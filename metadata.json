@@ -1,0 +1,5 @@
+{
+  "name": "PrintCost Pro",
+  "description": "App per lo sviluppo dei costi di stampa, calcolo usura, stima copertura toner tramite IA e generazione preventivi per packaging ed etichette.",
+  "requestFramePermissions": []
+}
