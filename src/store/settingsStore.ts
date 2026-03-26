@@ -35,7 +35,16 @@ export function getSettings(): Settings {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      // Deep merge with defaults to ensure new properties (like lamination) exist
+      return {
+        ...DEFAULT_SETTINGS,
+        ...parsed,
+        toner: { ...DEFAULT_SETTINGS.toner, ...parsed.toner },
+        wear: { ...DEFAULT_SETTINGS.wear, ...parsed.wear },
+        labor: { ...DEFAULT_SETTINGS.labor, ...parsed.labor },
+        lamination: { ...DEFAULT_SETTINGS.lamination, ...parsed.lamination },
+      };
     } catch (e) {
       console.error('Failed to parse settings', e);
     }
