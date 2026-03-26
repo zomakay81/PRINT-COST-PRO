@@ -1,11 +1,17 @@
 export interface Project {
   id: string;
   name: string;
+  clientName: string;
   quantity: number;
   itemDimensions: { width: number; height: number };
   sheetDimensions: { width: number; height: number };
   pages: PageAnalysis[];
   margin: number;
+  productionTimeHours: number;
+  excludeLabor: boolean;
+  includeLamination: boolean;
+  laminationType: 'glossy' | 'matte' | 'soft-touch' | 'matte-black';
+  isArchived: boolean;
   createdAt: number;
 }
 
@@ -34,6 +40,12 @@ export interface Settings {
   labor: {
     hourlyRate: number;
     overhead: number;
+  };
+  lamination: {
+    glossy: number; // cost per sheet
+    matte: number;
+    softTouch: number;
+    matteBlack: number;
   };
   papers: PaperType[];
 }

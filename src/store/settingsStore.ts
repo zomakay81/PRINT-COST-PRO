@@ -19,6 +19,12 @@ const DEFAULT_SETTINGS: Settings = {
     hourlyRate: 35,
     overhead: 10,
   },
+  lamination: {
+    glossy: 0.10,
+    matte: 0.12,
+    softTouch: 0.25,
+    matteBlack: 0.30,
+  },
   papers: [
     { id: '1', name: 'SRA3 300g Patinata Opaca', costPerSheet: 0.18, width: 320, height: 450, weight: 300 },
     { id: '2', name: 'A3 80g Offset', costPerSheet: 0.05, width: 297, height: 420, weight: 80 },

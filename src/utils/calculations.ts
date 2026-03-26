@@ -10,7 +10,12 @@ export interface DetailedCosts {
     total: number;
   };
   wearCost: number;
-  laborCost: number;
+  laborCost: {
+    base: number;
+    overhead: number;
+    total: number;
+  };
+  laminationCost: number;
   totalProductionCost: number;
   unitProductionCost: number;
   finalPrice: number;
@@ -60,6 +65,18 @@ export function calculateDetailedCosts(
   const perSheetWear = settings.wear.drum + settings.wear.fuser + settings.wear.belt + settings.wear.other;
   const wearCost = totalSheets * perSheetWear;
 
+  // Lamination Cost
+  let laminationCost = 0;
+  if (project.includeLamination) {
+    const laminationPricePerSheet = {
+      'glossy': settings.lamination.glossy,
+      'matte': settings.lamination.matte,
+      'soft-touch': settings.lamination.softTouch,
+      'matte-black': settings.lamination.matteBlack
+    }[project.laminationType];
+    laminationCost = totalSheets * laminationPricePerSheet;
+  }
+
   // Toner Cost Calculation
   // Yield is pages at 5% coverage
   // Total cost = (sheets * coverage%) / (yield * 5%) * price
@@ -79,10 +96,19 @@ export function calculateDetailedCosts(
 
   const totalTonerCost = tonerC + tonerM + tonerY + tonerK;
 
-  // Labor Cost
-  const laborCost = estimatedTimeHours * settings.labor.hourlyRate * (1 + settings.labor.overhead / 100);
+  // Labor Cost Breakdown
+  const productionTime = project.productionTimeHours || estimatedTimeHours;
+  const baseLabor = productionTime * settings.labor.hourlyRate;
+  const overheadLabor = baseLabor * (settings.labor.overhead / 100);
+  const totalLabor = project.excludeLabor ? 0 : baseLabor + overheadLabor;
 
-  const totalProductionCost = paperCost + wearCost + totalTonerCost + laborCost;
+  const laborCostDetails = {
+    base: project.excludeLabor ? 0 : baseLabor,
+    overhead: project.excludeLabor ? 0 : overheadLabor,
+    total: totalLabor
+  };
+
+  const totalProductionCost = paperCost + wearCost + totalTonerCost + totalLabor + laminationCost;
   const unitProductionCost = project.quantity > 0 ? totalProductionCost / project.quantity : 0;
 
   const finalPrice = totalProductionCost * (1 + project.margin / 100);
@@ -98,7 +124,8 @@ export function calculateDetailedCosts(
       total: totalTonerCost
     },
     wearCost,
-    laborCost,
+    laborCost: laborCostDetails,
+    laminationCost,
     totalProductionCost,
     unitProductionCost,
     finalPrice,

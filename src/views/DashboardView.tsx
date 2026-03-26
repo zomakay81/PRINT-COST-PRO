@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import {
   Plus, Settings as SettingsIcon, LayoutGrid, FileText,
-  ChevronRight, Calculator, PieChart, TrendingUp, Search, Trash2
+  ChevronRight, Calculator, PieChart, TrendingUp, Search, Trash2,
+  Archive, User, CheckCircle2, Circle
 } from 'lucide-react';
 import { getProjects, deleteProject } from '../store/projectStore';
 import { Project } from '../types';
@@ -15,10 +16,15 @@ interface DashboardProps {
 export default function DashboardView({ onNewProject, onOpenProject }: DashboardProps) {
   const [projects, setProjects] = useState<Project[]>(getProjects());
   const [searchTerm, setSearchTerm] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
 
-  const filteredProjects = projects.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ).sort((a, b) => b.createdAt - a.createdAt);
+  const filteredProjects = projects.filter(p => {
+    const matchesSearch =
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.clientName?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesArchive = p.isArchived === showArchived;
+    return matchesSearch && matchesArchive;
+  }).sort((a, b) => b.createdAt - a.createdAt);
 
   const stats = [
     { label: 'Progetti Totali', value: projects.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -57,16 +63,39 @@ export default function DashboardView({ onNewProject, onOpenProject }: Dashboard
       </div>
 
       {/* Project List */}
-      <Card title="Ultimi Progetti Salvati" icon={FileText}>
+      <Card title={showArchived ? "Archivio Progetti" : "Progetti Attivi"} icon={showArchived ? Archive : FileText}>
         <div className="space-y-6">
-          <div className="flex items-center relative max-w-md">
-            <Search className="absolute left-3 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Cerca progetto..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-end">
+            <div className="flex items-center relative w-full max-w-md">
+              <Search className="absolute left-3 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Cerca per progetto o cliente..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            <div className="flex bg-gray-100 p-1 rounded-lg">
+              <button
+                onClick={() => setShowArchived(false)}
+                className={cn(
+                  "px-4 py-2 text-sm font-medium rounded-md transition-all",
+                  !showArchived ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                )}
+              >
+                Attivi
+              </button>
+              <button
+                onClick={() => setShowArchived(true)}
+                className={cn(
+                  "px-4 py-2 text-sm font-medium rounded-md transition-all",
+                  showArchived ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                )}
+              >
+                Archivio
+              </button>
+            </div>
           </div>
 
           <div className="overflow-hidden border border-gray-100 rounded-xl divide-y divide-gray-50">
@@ -89,16 +118,23 @@ export default function DashboardView({ onNewProject, onOpenProject }: Dashboard
                   onClick={() => onOpenProject(project)}
                 >
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-white border border-gray-100 rounded-lg flex items-center justify-center text-blue-600 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                      <FileText className="w-6 h-6" />
+                    <div className={cn(
+                      "w-12 h-12 border rounded-lg flex items-center justify-center shadow-sm group-hover:text-white transition-colors",
+                      project.isArchived
+                        ? "bg-amber-50 border-amber-100 text-amber-600 group-hover:bg-amber-600"
+                        : "bg-white border-gray-100 text-blue-600 group-hover:bg-blue-600"
+                    )}>
+                      {project.isArchived ? <Archive className="w-6 h-6" /> : <FileText className="w-6 h-6" />}
                     </div>
                     <div>
                       <h4 className="font-bold text-gray-900">{project.name}</h4>
-                      <p className="text-xs text-gray-500 flex items-center">
-                        <span className="font-medium mr-2">{project.quantity} pz</span>
-                        <span className="w-1 h-1 bg-gray-300 rounded-full mr-2" />
+                      <div className="flex items-center space-x-3 text-xs text-gray-500">
+                        <span className="flex items-center"><User className="w-3 h-3 mr-1" /> {project.clientName || 'Privato'}</span>
+                        <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                        <span className="font-medium">{project.quantity} pz</span>
+                        <span className="w-1 h-1 bg-gray-300 rounded-full" />
                         <span>{new Date(project.createdAt).toLocaleDateString()}</span>
-                      </p>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">

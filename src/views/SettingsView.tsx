@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Euro, Calculator, Printer, User, HelpCircle, Save, Trash2, Plus } from 'lucide-react';
+import { Settings as SettingsIcon, Euro, Calculator, Printer, User, HelpCircle, Save, Trash2, Plus, Layers } from 'lucide-react';
 import { Settings, TonerCost, PaperType } from '../types';
 import { getSettings, saveSettings } from '../store/settingsStore';
 import { Card, Button, Input } from '../components/ui/BaseComponents';
@@ -35,6 +35,13 @@ export default function SettingsView() {
     setSettings(prev => ({
       ...prev,
       labor: { ...prev.labor, [field]: value }
+    }));
+  };
+
+  const updateLamination = (type: keyof Settings['lamination'], value: number) => {
+    setSettings(prev => ({
+      ...prev,
+      lamination: { ...prev.lamination, [type]: value }
     }));
   };
 
@@ -148,6 +155,36 @@ export default function SettingsView() {
               type="number"
               value={settings.labor.overhead}
               onChange={e => updateLabor('overhead', Number(e.target.value))}
+            />
+          </div>
+        </Card>
+
+        {/* Lamination Costs */}
+        <Card title="Costi Plastificazione (€/fg)" icon={Layers}>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Lucida"
+              type="number" step="0.01"
+              value={settings.lamination.glossy}
+              onChange={e => updateLamination('glossy', Number(e.target.value))}
+            />
+            <Input
+              label="Opaca"
+              type="number" step="0.01"
+              value={settings.lamination.matte}
+              onChange={e => updateLamination('matte', Number(e.target.value))}
+            />
+            <Input
+              label="Soft Touch"
+              type="number" step="0.01"
+              value={settings.lamination.softTouch}
+              onChange={e => updateLamination('softTouch', Number(e.target.value))}
+            />
+            <Input
+              label="Nera Opaca"
+              type="number" step="0.01"
+              value={settings.lamination.matteBlack}
+              onChange={e => updateLamination('matteBlack', Number(e.target.value))}
             />
           </div>
         </Card>

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
   Upload, FileImage, Euro, LayoutTemplate, Settings as SettingsIcon,
   TrendingUp, AlertCircle, Loader2, Save, Trash2, Printer,
-  FileText, Plus, RefreshCcw, Layers
+  FileText, Plus, RefreshCcw, Layers, User, Clock, Scissors, Archive
 } from 'lucide-react';
 import { Project, PageAnalysis } from '../types';
 import { getSettings } from '../store/settingsStore';
@@ -17,11 +17,17 @@ export default function ProjectView() {
   const [project, setProject] = useState<Project>({
     id: Math.random().toString(36).substr(2, 9),
     name: 'Nuovo Progetto',
+    clientName: '',
     quantity: 1000,
     itemDimensions: { width: 100, height: 100 },
     sheetDimensions: { width: 320, height: 450 },
     pages: [],
     margin: 30,
+    productionTimeHours: 0.5,
+    excludeLabor: false,
+    includeLamination: false,
+    laminationType: 'glossy',
+    isArchived: false,
     createdAt: Date.now()
   });
 
@@ -100,16 +106,36 @@ export default function ProjectView() {
 
         {/* Project Header */}
         <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <div className="flex-1">
-            <Input
-              value={project.name}
-              onChange={e => setProject(prev => ({ ...prev, name: e.target.value }))}
-              className="text-2xl font-bold bg-transparent border-none px-0 focus:ring-0 w-full"
-              placeholder="Nome del Progetto"
-            />
-            <p className="text-sm text-gray-500">Creato il {new Date(project.createdAt).toLocaleDateString()}</p>
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center space-x-4">
+              <Input
+                value={project.name}
+                onChange={e => setProject(prev => ({ ...prev, name: e.target.value }))}
+                className="text-2xl font-bold bg-transparent border-none px-0 focus:ring-0 w-full"
+                placeholder="Nome del Progetto"
+              />
+            </div>
+            <div className="flex items-center space-x-2 text-gray-500">
+              <User className="w-4 h-4" />
+              <Input
+                value={project.clientName}
+                onChange={e => setProject(prev => ({ ...prev, clientName: e.target.value }))}
+                className="text-sm bg-transparent border-none px-0 focus:ring-0 w-48"
+                placeholder="Nome Cliente"
+              />
+              <span className="text-gray-300 mx-2">|</span>
+              <p className="text-sm">Creato il {new Date(project.createdAt).toLocaleDateString()}</p>
+            </div>
           </div>
           <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              icon={Archive}
+              onClick={() => setProject(prev => ({ ...prev, isArchived: !prev.isArchived }))}
+              className={project.isArchived ? 'bg-amber-50 text-amber-600 border-amber-200' : ''}
+            >
+              {project.isArchived ? 'Archiviato' : 'Archivia'}
+            </Button>
             <Button variant="outline" icon={RefreshCcw} onClick={() => window.location.reload()}>Reset</Button>
             <Button variant="primary" icon={Save} onClick={handleSave} loading={isSaving}>Salva Progetto</Button>
           </div>
@@ -165,6 +191,58 @@ export default function ProjectView() {
                   <span className="text-gray-500 block">Costo Foglio</span>
                   <span className="font-medium">€ {paperCostPerSheet.toFixed(3)}</span>
                 </div>
+              </div>
+            </div>
+          </Card>
+          <Card title="Opzioni Extra & Tempi" icon={Clock}>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <User className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium">Escludi Manodopera</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={project.excludeLabor}
+                  onChange={e => setProject(prev => ({ ...prev, excludeLabor: e.target.checked }))}
+                  className="w-4 h-4 text-blue-600 rounded"
+                />
+              </div>
+
+              <Input
+                label="Tempo Produzione (Ore)"
+                type="number" step="0.1"
+                value={project.productionTimeHours}
+                onChange={e => setProject(prev => ({ ...prev, productionTimeHours: Number(e.target.value) }))}
+                helper="Tempo stimato per l'intero lotto"
+              />
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Scissors className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium">Plastificazione</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={project.includeLamination}
+                    onChange={e => setProject(prev => ({ ...prev, includeLamination: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                </div>
+
+                {project.includeLamination && (
+                  <select
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm"
+                    value={project.laminationType}
+                    onChange={e => setProject(prev => ({ ...prev, laminationType: e.target.value as any }))}
+                  >
+                    <option value="glossy">Lucida</option>
+                    <option value="matte">Opaca</option>
+                    <option value="soft-touch">Soft Touch</option>
+                    <option value="matte-black">Nera Opaca</option>
+                  </select>
+                )}
               </div>
             </div>
           </Card>
@@ -281,9 +359,27 @@ export default function ProjectView() {
                   <span className="text-white">€ {costs.tonerCost.total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Usura & Manodopera</span>
-                  <span className="text-white">€ {(costs.wearCost + costs.laborCost).toFixed(2)}</span>
+                  <span className="text-gray-400">Usura Macchina</span>
+                  <span className="text-white">€ {costs.wearCost.toFixed(2)}</span>
                 </div>
+                {!project.excludeLabor && (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Manodopera Base</span>
+                      <span className="text-white">€ {costs.laborCost.base.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Spese Generali ({settings.labor.overhead}%)</span>
+                      <span className="text-white">€ {costs.laborCost.overhead.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+                {project.includeLamination && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">Plastificazione</span>
+                    <span className="text-white">€ {costs.laminationCost.toFixed(2)}</span>
+                  </div>
+                )}
               </div>
 
               <div className="h-40 w-full pt-4">

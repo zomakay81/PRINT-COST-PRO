@@ -24,8 +24,9 @@ export function generateQuotePDF(project: Project, costs: DetailedCosts, setting
 
   doc.setFontSize(10);
   doc.setTextColor(107, 114, 128);
-  doc.text(`Progetto: ${project.name}`, 20, 32);
-  doc.text(`Data: ${new Date().toLocaleDateString()}`, 160, 32);
+  doc.text(`Progetto: ${project.name}`, 20, 30);
+  doc.text(`Cliente: ${project.clientName || 'N/D'}`, 20, 35);
+  doc.text(`Data: ${new Date().toLocaleDateString()}`, 160, 30);
 
   // Client Info Placeholder
   doc.setTextColor(31, 41, 55);
@@ -36,6 +37,7 @@ export function generateQuotePDF(project: Project, costs: DetailedCosts, setting
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.text(`Quantità: ${project.quantity} pezzi`, 20, 62);
+  doc.text(`Tempo Produzione: ${project.productionTimeHours}h`, 100, 62);
   doc.text(`Formato Prodotto: ${project.itemDimensions.width}x${project.itemDimensions.height} mm`, 20, 67);
   doc.text(`Supporto: ${settings.papers.find(p => p.width === project.sheetDimensions.width)?.name || 'Standard'}`, 20, 72);
 
@@ -44,10 +46,13 @@ export function generateQuotePDF(project: Project, costs: DetailedCosts, setting
     startY: 85,
     head: [['Descrizione', 'Dettagli', 'Importo (€)']],
     body: [
-      ['Costo Supporto Cartaceo', `${costs.totalSheets} fogli`, costs.paperCost.toFixed(2)],
-      ['Costo Toner (CMYK)', `Copertura Media: ${project.pages[0]?.c.toFixed(1)}% C, ${project.pages[0]?.m.toFixed(1)}% M, ...`, costs.tonerCost.total.toFixed(2)],
-      ['Lavorazione & Usura', 'Avviamento e usura macchina', (costs.wearCost + costs.laborCost).toFixed(2)],
-      ['Margine & Gestione', `${project.margin}% ricarico applicato`, (costs.finalPrice - costs.totalProductionCost).toFixed(2)],
+      ['Supporto Cartaceo', `${costs.totalSheets} fogli`, costs.paperCost.toFixed(2)],
+      ['Toner (CMYK)', `Analisi copertura media per pagina`, costs.tonerCost.total.toFixed(2)],
+      ['Usura Macchina', 'Costi tecnici tamburi/fuso', costs.wearCost.toFixed(2)],
+      ['Manodopera Base', project.excludeLabor ? 'Esclusa' : `${project.productionTimeHours} ore`, costs.laborCost.base.toFixed(2)],
+      ['Spese Generali', `Overhead aziendale`, costs.laborCost.overhead.toFixed(2)],
+      ['Plastificazione', project.includeLamination ? project.laminationType : 'Nessuna', costs.laminationCost.toFixed(2)],
+      ['Margine & Utile', `${project.margin}% ricarico`, (costs.finalPrice - costs.totalProductionCost).toFixed(2)],
     ],
     headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
     alternateRowStyles: { fillColor: [249, 250, 251] },
