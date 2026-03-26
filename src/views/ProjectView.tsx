@@ -24,6 +24,7 @@ export default function ProjectView() {
     pages: [],
     margin: 30,
     productionTimeHours: 0.5,
+    finishingTimeHours: 0.5,
     excludeLabor: false,
     includeLamination: false,
     laminationType: 'glossy',
@@ -209,13 +210,22 @@ export default function ProjectView() {
                 />
               </div>
 
-              <Input
-                label="Tempo Produzione (Ore)"
-                type="number" step="0.1"
-                value={project.productionTimeHours}
-                onChange={e => setProject(prev => ({ ...prev, productionTimeHours: Number(e.target.value) }))}
-                helper="Tempo stimato per l'intero lotto"
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Tempo Stampa (Auto)"
+                  type="text"
+                  value={`${costs.laborCost.printTime.toFixed(2)}h`}
+                  disabled
+                  helper="Calcolato da PPM stampante"
+                />
+                <Input
+                  label="Tempo Finitura (Ore)"
+                  type="number" step="0.1"
+                  value={project.finishingTimeHours}
+                  onChange={e => setProject(prev => ({ ...prev, finishingTimeHours: Number(e.target.value) }))}
+                  helper="Taglio, imballo, ecc."
+                />
+              </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -365,7 +375,7 @@ export default function ProjectView() {
                 {!project.excludeLabor && (
                   <>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Manodopera Base</span>
+                      <span className="text-gray-400">Manodopera ({costs.laborCost.totalTime.toFixed(2)}h)</span>
                       <span className="text-white">€ {costs.laborCost.base.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">

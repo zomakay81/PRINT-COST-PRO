@@ -8,6 +8,7 @@ export interface Project {
   pages: PageAnalysis[];
   margin: number;
   productionTimeHours: number;
+  finishingTimeHours: number;
   excludeLabor: boolean;
   includeLamination: boolean;
   laminationType: 'glossy' | 'matte' | 'soft-touch' | 'matte-black';
@@ -40,6 +41,10 @@ export interface Settings {
   labor: {
     hourlyRate: number;
     overhead: number;
+  };
+  printer: {
+    bwPpm: number;
+    colorPpm: number;
   };
   lamination: {
     glossy: number; // cost per sheet

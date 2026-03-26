@@ -37,7 +37,7 @@ export function generateQuotePDF(project: Project, costs: DetailedCosts, setting
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.text(`Quantità: ${project.quantity} pezzi`, 20, 62);
-  doc.text(`Tempo Produzione: ${project.productionTimeHours}h`, 100, 62);
+  doc.text(`Tempo Totale: ${costs.laborCost.totalTime.toFixed(2)}h`, 100, 62);
   doc.text(`Formato Prodotto: ${project.itemDimensions.width}x${project.itemDimensions.height} mm`, 20, 67);
   doc.text(`Supporto: ${settings.papers.find(p => p.width === project.sheetDimensions.width)?.name || 'Standard'}`, 20, 72);
 
@@ -49,7 +49,7 @@ export function generateQuotePDF(project: Project, costs: DetailedCosts, setting
       ['Supporto Cartaceo', `${costs.totalSheets} fogli`, costs.paperCost.toFixed(2)],
       ['Toner (CMYK)', `Analisi copertura media per pagina`, costs.tonerCost.total.toFixed(2)],
       ['Usura Macchina', 'Costi tecnici tamburi/fuso', costs.wearCost.toFixed(2)],
-      ['Manodopera Base', project.excludeLabor ? 'Esclusa' : `${project.productionTimeHours} ore`, costs.laborCost.base.toFixed(2)],
+      ['Manodopera Base', project.excludeLabor ? 'Esclusa' : `${costs.laborCost.totalTime.toFixed(2)} ore`, costs.laborCost.base.toFixed(2)],
       ['Spese Generali', `Overhead aziendale`, costs.laborCost.overhead.toFixed(2)],
       ['Plastificazione', project.includeLamination ? project.laminationType : 'Nessuna', costs.laminationCost.toFixed(2)],
       ['Margine & Utile', `${project.margin}% ricarico`, (costs.finalPrice - costs.totalProductionCost).toFixed(2)],

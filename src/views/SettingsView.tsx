@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Euro, Calculator, Printer, User, HelpCircle, Save, Trash2, Plus, Layers } from 'lucide-react';
+import { Settings as SettingsIcon, Euro, Calculator, Printer, User, HelpCircle, Save, Trash2, Plus, Layers, Zap } from 'lucide-react';
 import { Settings, TonerCost, PaperType } from '../types';
 import { getSettings, saveSettings } from '../store/settingsStore';
 import { Card, Button, Input } from '../components/ui/BaseComponents';
@@ -42,6 +42,13 @@ export default function SettingsView() {
     setSettings(prev => ({
       ...prev,
       lamination: { ...prev.lamination, [type]: value }
+    }));
+  };
+
+  const updatePrinter = (type: keyof Settings['printer'], value: number) => {
+    setSettings(prev => ({
+      ...prev,
+      printer: { ...prev.printer, [type]: value }
     }));
   };
 
@@ -155,6 +162,26 @@ export default function SettingsView() {
               type="number"
               value={settings.labor.overhead}
               onChange={e => updateLabor('overhead', Number(e.target.value))}
+            />
+          </div>
+        </Card>
+
+        {/* Printer Speed */}
+        <Card title="Velocità di Stampa (PPM)" icon={Zap}>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Biano e Nero (BW)"
+              type="number"
+              value={settings.printer.bwPpm}
+              onChange={e => updatePrinter('bwPpm', Number(e.target.value))}
+              helper="Pagine per minuto"
+            />
+            <Input
+              label="Colori"
+              type="number"
+              value={settings.printer.colorPpm}
+              onChange={e => updatePrinter('colorPpm', Number(e.target.value))}
+              helper="Pagine per minuto"
             />
           </div>
         </Card>

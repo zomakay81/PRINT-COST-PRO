@@ -14,6 +14,9 @@ export interface DetailedCosts {
     base: number;
     overhead: number;
     total: number;
+    printTime: number;
+    finishingTime: number;
+    totalTime: number;
   };
   laminationCost: number;
   totalProductionCost: number;
@@ -96,16 +99,29 @@ export function calculateDetailedCosts(
 
   const totalTonerCost = tonerC + tonerM + tonerY + tonerK;
 
+  // Automatic Print Time Calculation
+  // We check if there's any color on any page
+  const isColor = project.pages.some(p => p.c > 0.1 || p.m > 0.1 || p.y > 0.1);
+  const printerSpeed = isColor ? settings.printer.colorPpm : settings.printer.bwPpm;
+
+  const totalImpressions = totalSheets * project.pages.length;
+  const printTimeHours = printerSpeed > 0 ? (totalImpressions / printerSpeed) / 60 : 0;
+
   // Labor Cost Breakdown
-  const productionTime = project.productionTimeHours || estimatedTimeHours;
-  const baseLabor = productionTime * settings.labor.hourlyRate;
+  const finishingTime = project.finishingTimeHours || 0;
+  const totalTime = printTimeHours + finishingTime;
+
+  const baseLabor = totalTime * settings.labor.hourlyRate;
   const overheadLabor = baseLabor * (settings.labor.overhead / 100);
   const totalLabor = project.excludeLabor ? 0 : baseLabor + overheadLabor;
 
   const laborCostDetails = {
     base: project.excludeLabor ? 0 : baseLabor,
     overhead: project.excludeLabor ? 0 : overheadLabor,
-    total: totalLabor
+    total: totalLabor,
+    printTime: printTimeHours,
+    finishingTime: finishingTime,
+    totalTime: totalTime
   };
 
   const totalProductionCost = paperCost + wearCost + totalTonerCost + totalLabor + laminationCost;

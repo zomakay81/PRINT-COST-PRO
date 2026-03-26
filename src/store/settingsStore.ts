@@ -19,6 +19,10 @@ const DEFAULT_SETTINGS: Settings = {
     hourlyRate: 35,
     overhead: 10,
   },
+  printer: {
+    bwPpm: 100,
+    colorPpm: 80,
+  },
   lamination: {
     glossy: 0.10,
     matte: 0.12,
@@ -43,6 +47,7 @@ export function getSettings(): Settings {
         toner: { ...DEFAULT_SETTINGS.toner, ...parsed.toner },
         wear: { ...DEFAULT_SETTINGS.wear, ...parsed.wear },
         labor: { ...DEFAULT_SETTINGS.labor, ...parsed.labor },
+        printer: { ...DEFAULT_SETTINGS.printer, ...parsed.printer },
         lamination: { ...DEFAULT_SETTINGS.lamination, ...parsed.lamination },
       };
     } catch (e) {
