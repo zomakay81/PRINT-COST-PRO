@@ -13,33 +13,56 @@ import { Card, Button, Input, cn } from '../components/ui/BaseComponents';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { generateQuotePDF } from '../utils/pdfGenerator';
 
-export default function ProjectView() {
-  const [project, setProject] = useState<Project>({
-    id: Math.random().toString(36).substr(2, 9),
-    name: 'Nuovo Progetto',
-    clientName: '',
-    quantity: 1000,
-    itemDimensions: { width: 100, height: 100 },
-    sheetDimensions: { width: 320, height: 450 },
-    pages: [],
-    margin: 30,
-    productionTimeHours: 0.5,
-    finishingTimeHours: 0.5,
-    excludeLabor: false,
-    includeLamination: false,
-    laminationType: 'glossy',
-    isArchived: false,
-    createdAt: Date.now()
-  });
+interface ProjectViewProps {
+  initialProject?: Project | null;
+}
+
+const DEFAULT_PROJECT = (settings: any): Project => ({
+  id: Math.random().toString(36).substr(2, 9),
+  name: 'Nuovo Progetto',
+  clientName: '',
+  quantity: 1000,
+  itemDimensions: { width: 100, height: 100 },
+  sheetDimensions: { width: settings.papers[0]?.width || 320, height: settings.papers[0]?.height || 450 },
+  pages: [],
+  margin: 30,
+  productionTimeHours: 0.5,
+  finishingTimeHours: 0.5,
+  excludeLabor: false,
+  includeLamination: false,
+  laminationType: 'glossy',
+  isArchived: false,
+  createdAt: Date.now()
+});
+
+export default function ProjectView({ initialProject }: ProjectViewProps) {
+  const settings = getSettings();
+  const [project, setProject] = useState<Project>(initialProject || DEFAULT_PROJECT(settings));
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const settings = getSettings();
 
-  const [selectedPaperId, setSelectedPaperId] = useState(settings.papers[0]?.id || '');
+  const [selectedPaperId, setSelectedPaperId] = useState(() => {
+    if (initialProject) {
+      const paper = settings.papers.find(p => p.width === initialProject.sheetDimensions.width && p.height === initialProject.sheetDimensions.height);
+      return paper?.id || settings.papers[0]?.id || '';
+    }
+    return settings.papers[0]?.id || '';
+  });
+
   const selectedPaper = settings.papers.find(p => p.id === selectedPaperId);
   const paperCostPerSheet = selectedPaper?.costPerSheet || 0;
+
+  useEffect(() => {
+    if (initialProject) {
+      setProject(initialProject);
+      const paper = settings.papers.find(p => p.width === initialProject.sheetDimensions.width && p.height === initialProject.sheetDimensions.height);
+      if (paper) setSelectedPaperId(paper.id);
+    } else {
+      setProject(DEFAULT_PROJECT(settings));
+    }
+  }, [initialProject]);
 
   useEffect(() => {
     if (selectedPaper) {

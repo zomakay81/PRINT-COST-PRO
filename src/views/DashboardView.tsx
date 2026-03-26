@@ -22,7 +22,7 @@ export default function DashboardView({ onNewProject, onOpenProject }: Dashboard
     const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.clientName?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesArchive = p.isArchived === showArchived;
+    const matchesArchive = !!p.isArchived === showArchived;
     return matchesSearch && matchesArchive;
   }).sort((a, b) => b.createdAt - a.createdAt);
 

@@ -132,7 +132,7 @@ export default function App() {
                 onOpenProject={(p) => navigateTo('project', p)}
               />
             )}
-            {currentView === 'project' && <ProjectView />}
+            {currentView === 'project' && <ProjectView initialProject={activeProject} />}
             {currentView === 'settings' && <SettingsView />}
           </div>
         </div>
