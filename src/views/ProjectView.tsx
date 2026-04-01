@@ -367,17 +367,17 @@ export default function ProjectView({ initialProject }: ProjectViewProps) {
                         </div>
                         <div className="space-y-1.5">
                           {[
-                            { label: 'C', value: page.c, color: 'bg-cyan-400' },
-                            { label: 'M', value: page.m, color: 'bg-magenta-400' },
-                            { label: 'Y', value: page.y, color: 'bg-yellow-400' },
-                            { label: 'K', value: page.k, color: 'bg-gray-900' }
+                            { label: 'C', value: page.c || 0, color: 'bg-cyan-400' },
+                            { label: 'M', value: page.m || 0, color: 'bg-magenta-400' },
+                            { label: 'Y', value: page.y || 0, color: 'bg-yellow-400' },
+                            { label: 'K', value: page.k || 0, color: 'bg-gray-900' }
                           ].map(c => (
                             <div key={c.label} className="flex items-center space-x-2">
                               <span className="text-[10px] font-bold w-3">{c.label}</span>
                               <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                 <div className={cn("h-full transition-all duration-1000", c.color)} style={{ width: `${c.value}%` }} />
                               </div>
-                              <span className="text-[10px] font-mono w-8 text-right">{c.value.toFixed(1)}%</span>
+                              <span className="text-[10px] font-mono w-8 text-right">{(c.value || 0).toFixed(1)}%</span>
                             </div>
                           ))}
                         </div>

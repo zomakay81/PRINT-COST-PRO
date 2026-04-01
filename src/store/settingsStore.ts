@@ -48,12 +48,13 @@ export function getSettings(): Settings {
       return {
         ...DEFAULT_SETTINGS,
         ...parsed,
-        toner: { ...DEFAULT_SETTINGS.toner, ...parsed.toner },
-        wear: { ...DEFAULT_SETTINGS.wear, ...parsed.wear },
-        labor: { ...DEFAULT_SETTINGS.labor, ...parsed.labor },
-        printer: { ...DEFAULT_SETTINGS.printer, ...parsed.printer },
-        lamination: { ...DEFAULT_SETTINGS.lamination, ...parsed.lamination },
-        packaging: { ...DEFAULT_SETTINGS.packaging, ...parsed.packaging },
+        toner: parsed.toner ? { ...DEFAULT_SETTINGS.toner, ...parsed.toner } : DEFAULT_SETTINGS.toner,
+        wear: parsed.wear ? { ...DEFAULT_SETTINGS.wear, ...parsed.wear } : DEFAULT_SETTINGS.wear,
+        labor: parsed.labor ? { ...DEFAULT_SETTINGS.labor, ...parsed.labor } : DEFAULT_SETTINGS.labor,
+        printer: parsed.printer ? { ...DEFAULT_SETTINGS.printer, ...parsed.printer } : DEFAULT_SETTINGS.printer,
+        lamination: parsed.lamination ? { ...DEFAULT_SETTINGS.lamination, ...parsed.lamination } : DEFAULT_SETTINGS.lamination,
+        packaging: parsed.packaging ? { ...DEFAULT_SETTINGS.packaging, ...parsed.packaging } : DEFAULT_SETTINGS.packaging,
+        papers: parsed.papers || DEFAULT_SETTINGS.papers
       };
     } catch (e) {
       console.error('Failed to parse settings', e);

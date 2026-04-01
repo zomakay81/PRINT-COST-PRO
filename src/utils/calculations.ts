@@ -61,24 +61,25 @@ export function calculateDetailedCosts(
     project.sheetDimensions.height
   );
 
-  const totalSheets = itemsPerSheet > 0 ? Math.ceil(project.quantity / itemsPerSheet) : 0;
+  const totalSheets = itemsPerSheet > 0 ? Math.ceil((project.quantity || 0) / itemsPerSheet) : 0;
 
   // Paper Cost
-  const paperCost = totalSheets * paperCostPerSheet;
+  const paperCost = totalSheets * (paperCostPerSheet || 0);
 
   // Wear Cost (drums, fuser, etc. per sheet)
-  const perSheetWear = settings.wear.drum + settings.wear.fuser + settings.wear.belt + settings.wear.other;
+  const wearSettings = settings.wear || { drum: 0, fuser: 0, belt: 0, other: 0 };
+  const perSheetWear = (wearSettings.drum || 0) + (wearSettings.fuser || 0) + (wearSettings.belt || 0) + (wearSettings.other || 0);
   const wearCost = totalSheets * perSheetWear;
 
   // Lamination Cost
   let laminationCost = 0;
-  if (project.includeLamination) {
+  if (project.includeLamination && settings.lamination) {
     const laminationPricePerSheet = {
-      'glossy': settings.lamination.glossy,
-      'matte': settings.lamination.matte,
-      'soft-touch': settings.lamination.softTouch,
-      'matte-black': settings.lamination.matteBlack
-    }[project.laminationType];
+      'glossy': settings.lamination.glossy || 0,
+      'matte': settings.lamination.matte || 0,
+      'soft-touch': settings.lamination.softTouch || 0,
+      'matte-black': settings.lamination.matteBlack || 0
+    }[project.laminationType || 'glossy'] || 0;
     laminationCost = totalSheets * laminationPricePerSheet;
   }
 
@@ -103,18 +104,21 @@ export function calculateDetailedCosts(
 
   // Automatic Print Time Calculation
   // We check if there's any color on any page
-  const isColor = project.pages.some(p => p.c > 0.1 || p.m > 0.1 || p.y > 0.1);
-  const printerSpeed = isColor ? settings.printer.colorPpm : settings.printer.bwPpm;
+  const pages = project.pages || [];
+  const isColor = pages.some(p => (p.c || 0) > 0.1 || (p.m || 0) > 0.1 || (p.y || 0) > 0.1);
+  const printerSettings = settings.printer || { colorPpm: 1, bwPpm: 1 };
+  const printerSpeed = isColor ? (printerSettings.colorPpm || 1) : (printerSettings.bwPpm || 1);
 
-  const totalImpressions = totalSheets * project.pages.length;
+  const totalImpressions = totalSheets * pages.length;
   const printTimeHours = printerSpeed > 0 ? (totalImpressions / printerSpeed) / 60 : 0;
 
   // Labor Cost Breakdown
   const finishingTime = project.finishingTimeHours || 0;
   const totalTime = printTimeHours + finishingTime;
 
-  const baseLabor = totalTime * settings.labor.hourlyRate;
-  const overheadLabor = baseLabor * (settings.labor.overhead / 100);
+  const laborSettings = settings.labor || { hourlyRate: 0, overhead: 0 };
+  const baseLabor = totalTime * (laborSettings.hourlyRate || 0);
+  const overheadLabor = baseLabor * ((laborSettings.overhead || 0) / 100);
   const totalLabor = project.excludeLabor ? 0 : baseLabor + overheadLabor;
 
   const laborCostDetails = {
@@ -126,8 +130,9 @@ export function calculateDetailedCosts(
     totalTime: totalTime
   };
 
-  const packagingCost = project.includePackaging ? project.quantity * settings.packaging.unitCost : 0;
-  const shrinkWrapCost = project.includeShrinkWrap ? project.quantity * settings.packaging.shrinkWrapUnitCost : 0;
+  const packagingSettings = settings.packaging || { unitCost: 0, shrinkWrapUnitCost: 0 };
+  const packagingCost = project.includePackaging ? (project.quantity || 0) * (packagingSettings.unitCost || 0) : 0;
+  const shrinkWrapCost = project.includeShrinkWrap ? (project.quantity || 0) * (packagingSettings.shrinkWrapUnitCost || 0) : 0;
 
   const totalProductionCost = paperCost + wearCost + totalTonerCost + totalLabor + laminationCost + packagingCost + shrinkWrapCost;
   const unitProductionCost = project.quantity > 0 ? totalProductionCost / project.quantity : 0;
