@@ -19,6 +19,8 @@ export interface DetailedCosts {
     totalTime: number;
   };
   laminationCost: number;
+  packagingCost: number;
+  shrinkWrapCost: number;
   totalProductionCost: number;
   unitProductionCost: number;
   finalPrice: number;
@@ -124,7 +126,10 @@ export function calculateDetailedCosts(
     totalTime: totalTime
   };
 
-  const totalProductionCost = paperCost + wearCost + totalTonerCost + totalLabor + laminationCost;
+  const packagingCost = project.includePackaging ? project.quantity * settings.packaging.unitCost : 0;
+  const shrinkWrapCost = project.includeShrinkWrap ? project.quantity * settings.packaging.shrinkWrapUnitCost : 0;
+
+  const totalProductionCost = paperCost + wearCost + totalTonerCost + totalLabor + laminationCost + packagingCost + shrinkWrapCost;
   const unitProductionCost = project.quantity > 0 ? totalProductionCost / project.quantity : 0;
 
   const finalPrice = totalProductionCost * (1 + project.margin / 100);
@@ -142,6 +147,8 @@ export function calculateDetailedCosts(
     wearCost,
     laborCost: laborCostDetails,
     laminationCost,
+    packagingCost,
+    shrinkWrapCost,
     totalProductionCost,
     unitProductionCost,
     finalPrice,

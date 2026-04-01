@@ -29,6 +29,10 @@ const DEFAULT_SETTINGS: Settings = {
     softTouch: 0.25,
     matteBlack: 0.30,
   },
+  packaging: {
+    unitCost: 0.05,
+    shrinkWrapUnitCost: 0.03,
+  },
   papers: [
     { id: '1', name: 'SRA3 300g Patinata Opaca', costPerSheet: 0.18, width: 320, height: 450, weight: 300 },
     { id: '2', name: 'A3 80g Offset', costPerSheet: 0.05, width: 297, height: 420, weight: 80 },
@@ -49,6 +53,7 @@ export function getSettings(): Settings {
         labor: { ...DEFAULT_SETTINGS.labor, ...parsed.labor },
         printer: { ...DEFAULT_SETTINGS.printer, ...parsed.printer },
         lamination: { ...DEFAULT_SETTINGS.lamination, ...parsed.lamination },
+        packaging: { ...DEFAULT_SETTINGS.packaging, ...parsed.packaging },
       };
     } catch (e) {
       console.error('Failed to parse settings', e);

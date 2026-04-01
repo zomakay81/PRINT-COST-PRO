@@ -31,6 +31,8 @@ const DEFAULT_PROJECT = (settings: any): Project => ({
   excludeLabor: false,
   includeLamination: false,
   laminationType: 'glossy',
+  includePackaging: false,
+  includeShrinkWrap: false,
   isArchived: false,
   createdAt: Date.now()
 });
@@ -277,6 +279,32 @@ export default function ProjectView({ initialProject }: ProjectViewProps) {
                   </select>
                 )}
               </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Package className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium">Confezionamento</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={project.includePackaging}
+                  onChange={e => setProject(prev => ({ ...prev, includePackaging: e.target.checked }))}
+                  className="w-4 h-4 text-blue-600 rounded"
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Package className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium">Cellofanatura</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={project.includeShrinkWrap}
+                  onChange={e => setProject(prev => ({ ...prev, includeShrinkWrap: e.target.checked }))}
+                  className="w-4 h-4 text-blue-600 rounded"
+                />
+              </div>
             </div>
           </Card>
         </div>
@@ -411,6 +439,18 @@ export default function ProjectView({ initialProject }: ProjectViewProps) {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Plastificazione</span>
                     <span className="text-white">€ {costs.laminationCost.toFixed(2)}</span>
+                  </div>
+                )}
+                {project.includePackaging && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">Confezionamento</span>
+                    <span className="text-white">€ {costs.packagingCost.toFixed(2)}</span>
+                  </div>
+                )}
+                {project.includeShrinkWrap && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">Cellofanatura</span>
+                    <span className="text-white">€ {costs.shrinkWrapCost.toFixed(2)}</span>
                   </div>
                 )}
               </div>

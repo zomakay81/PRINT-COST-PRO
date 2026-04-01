@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Euro, Calculator, Printer, User, HelpCircle, Save, Trash2, Plus, Layers, Zap } from 'lucide-react';
+import { Settings as SettingsIcon, Euro, Calculator, Printer, User, HelpCircle, Save, Trash2, Plus, Layers, Zap, Package } from 'lucide-react';
 import { Settings, TonerCost, PaperType } from '../types';
 import { getSettings, saveSettings } from '../store/settingsStore';
 import { Card, Button, Input } from '../components/ui/BaseComponents';
@@ -49,6 +49,13 @@ export default function SettingsView() {
     setSettings(prev => ({
       ...prev,
       printer: { ...prev.printer, [type]: value }
+    }));
+  };
+
+  const updatePackaging = (type: keyof Settings['packaging'], value: number) => {
+    setSettings(prev => ({
+      ...prev,
+      packaging: { ...prev.packaging, [type]: value }
     }));
   };
 
@@ -182,6 +189,24 @@ export default function SettingsView() {
               value={settings.printer.colorPpm}
               onChange={e => updatePrinter('colorPpm', Number(e.target.value))}
               helper="Pagine per minuto"
+            />
+          </div>
+        </Card>
+
+        {/* Additional Services Costs */}
+        <Card title="Costi Servizi Aggiuntivi (€/pz)" icon={Package}>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Confezionamento"
+              type="number" step="0.01"
+              value={settings.packaging.unitCost}
+              onChange={e => updatePackaging('unitCost', Number(e.target.value))}
+            />
+            <Input
+              label="Cellofanatura"
+              type="number" step="0.01"
+              value={settings.packaging.shrinkWrapUnitCost}
+              onChange={e => updatePackaging('shrinkWrapUnitCost', Number(e.target.value))}
             />
           </div>
         </Card>

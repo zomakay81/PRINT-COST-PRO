@@ -12,6 +12,8 @@ export interface Project {
   excludeLabor: boolean;
   includeLamination: boolean;
   laminationType: 'glossy' | 'matte' | 'soft-touch' | 'matte-black';
+  includePackaging: boolean;
+  includeShrinkWrap: boolean;
   isArchived: boolean;
   createdAt: number;
 }
@@ -51,6 +53,10 @@ export interface Settings {
     matte: number;
     softTouch: number;
     matteBlack: number;
+  };
+  packaging: {
+    unitCost: number;
+    shrinkWrapUnitCost: number;
   };
   papers: PaperType[];
 }

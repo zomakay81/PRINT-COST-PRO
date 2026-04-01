@@ -52,6 +52,8 @@ export function generateQuotePDF(project: Project, costs: DetailedCosts, setting
       ['Manodopera Base', project.excludeLabor ? 'Esclusa' : `${costs.laborCost.totalTime.toFixed(2)} ore`, costs.laborCost.base.toFixed(2)],
       ['Spese Generali', `Overhead aziendale`, costs.laborCost.overhead.toFixed(2)],
       ['Plastificazione', project.includeLamination ? project.laminationType : 'Nessuna', costs.laminationCost.toFixed(2)],
+      ['Confezionamento', project.includePackaging ? 'Incluso' : 'Escluso', costs.packagingCost.toFixed(2)],
+      ['Cellofanatura', project.includeShrinkWrap ? 'Inclusa' : 'Esclusa', costs.shrinkWrapCost.toFixed(2)],
       ['Margine & Utile', `${project.margin}% ricarico`, (costs.finalPrice - costs.totalProductionCost).toFixed(2)],
     ],
     headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
