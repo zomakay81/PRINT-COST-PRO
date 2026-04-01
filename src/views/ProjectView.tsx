@@ -2,7 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
   Upload, FileImage, Euro, LayoutTemplate, Settings as SettingsIcon,
   TrendingUp, AlertCircle, Loader2, Save, Trash2, Printer,
-  FileText, Plus, RefreshCcw, Layers, User, Clock, Scissors, Archive
+  FileText, Plus, RefreshCcw, Layers, User, Clock, Scissors, Archive, Package,
+  Undo2, Redo2
 } from 'lucide-react';
 import { Project, PageAnalysis } from '../types';
 import { getSettings } from '../store/settingsStore';
@@ -12,6 +13,7 @@ import { calculateDetailedCosts, DetailedCosts } from '../utils/calculations';
 import { Card, Button, Input, cn } from '../components/ui/BaseComponents';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { generateQuotePDF } from '../utils/pdfGenerator';
+import { useHistory } from '../hooks/useHistory';
 
 interface ProjectViewProps {
   initialProject?: Project | null;
@@ -39,7 +41,7 @@ const DEFAULT_PROJECT = (settings: any): Project => ({
 
 export default function ProjectView({ initialProject }: ProjectViewProps) {
   const settings = getSettings();
-  const [project, setProject] = useState<Project>(initialProject || DEFAULT_PROJECT(settings));
+  const [project, setProject, undo, redo, canUndo, canRedo] = useHistory<Project>(initialProject || DEFAULT_PROJECT(settings));
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -154,6 +156,10 @@ export default function ProjectView({ initialProject }: ProjectViewProps) {
             </div>
           </div>
           <div className="flex items-center space-x-2">
+            <div className="flex items-center bg-white border border-gray-200 rounded-lg p-1 mr-2">
+              <Button variant="ghost" size="sm" onClick={undo} disabled={!canUndo} className="px-2 py-1 h-auto"><Undo2 className="w-4 h-4"/></Button>
+              <Button variant="ghost" size="sm" onClick={redo} disabled={!canRedo} className="px-2 py-1 h-auto"><Redo2 className="w-4 h-4"/></Button>
+            </div>
             <Button
               variant="outline"
               icon={Archive}

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Euro, Calculator, Printer, User, HelpCircle, Save, Trash2, Plus, Layers, Zap, Package } from 'lucide-react';
+import { Settings as SettingsIcon, Euro, Calculator, Printer, User, HelpCircle, Save, Trash2, Plus, Layers, Zap, Package, Download, Upload as UploadIcon, RotateCcw } from 'lucide-react';
 import { Settings, TonerCost, PaperType } from '../types';
 import { getSettings, saveSettings } from '../store/settingsStore';
 import { Card, Button, Input } from '../components/ui/BaseComponents';
+import { exportData, importData, resetApp } from '../utils/backup';
 
 export default function SettingsView() {
   const [settings, setSettings] = useState<Settings>(getSettings());
@@ -73,6 +74,21 @@ export default function SettingsView() {
 
   const removePaper = (id: string) => {
     setSettings(prev => ({ ...prev, papers: prev.papers.filter(p => p.id !== id) }));
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      if (importData(content)) {
+        window.location.reload();
+      } else {
+        alert("Errore nell'importazione del file.");
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -238,6 +254,30 @@ export default function SettingsView() {
               value={settings.lamination.matteBlack}
               onChange={e => updateLamination('matteBlack', Number(e.target.value))}
             />
+          </div>
+        </Card>
+
+        {/* Data Management */}
+        <Card title="Gestione Dati & Backup" icon={Download}>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Button variant="outline" icon={Download} onClick={exportData} className="w-full">Esporta Backup (.json)</Button>
+              <div className="relative">
+                <Button variant="outline" icon={UploadIcon} className="w-full">Importa Backup</Button>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImport}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </div>
+            </div>
+            <div className="pt-4 border-t border-gray-100">
+              <Button variant="danger" icon={RotateCcw} onClick={resetApp} className="w-full">
+                Resetta Tutta l'App
+              </Button>
+              <p className="text-[10px] text-gray-400 mt-2 text-center uppercase tracking-widest font-bold">Attenzione: operazione irreversibile</p>
+            </div>
           </div>
         </Card>
 
